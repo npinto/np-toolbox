@@ -1,0 +1,5 @@
+# Example of use:
+
+for i in `seq 0 9`; do for f in png_files_32x32/*$i.png; do python convert_image_to_table.py $f ${f}_table.png; done &; done;
+
+for i in `seq 0 9`; do for f in png_files_32x32/*$i.png_table.png; do echo $f; convert ${f} -crop 702x724+60+39 ${f}_cropped.png; done &; done;
