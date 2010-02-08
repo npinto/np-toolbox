@@ -8,6 +8,8 @@ cyan='\e[0;36m'
 CYAN='\e[1;36m'
 NC='\e[0m' # No Color
 
+# TODO: install sdk in /usr/local/cuda/sdk instead of /home/thor/
+
 # ------------------------------------------------------------------------------
 # Make sure only root can run our script
 if [[ $EUID -ne 0 ]]; then
@@ -25,7 +27,7 @@ cd $TMP_DIR
 echo -e "[ ${RED}Uninstalling previous installation${NC} ]"
 apt-get --purge remove nvidia"*" -y
 echo -e "[ ${RED}Installing dependencies${NC} ]"
-apt-get install libc6-dev-i386 build-essential libglut3-dev libxmu-dev libxi-dev -y
+apt-get install libc6-dev-i386 build-essential libglut3-dev libxmu-dev libxi-dev gcc-4.3 g++-4.3 -y
 
 # ------------------------------------------------------------------------------
 echo -e "[${RED} Installing driver ${NC}]"
@@ -92,6 +94,8 @@ cd ./cudasdk && sudo -u thor ./install-sdk-linux.pl --prefix=/home/thor/NVIDIA_G
 # compile SDK
 echo -e "[${RED} Compiling sdk ${NC}]"
 cd /home/thor/NVIDIA_GPU_Computing_SDK/C
+mv -vf common/common.mk{,.bak}
+sudo -u thor sed -e 's/^NVCCFLAGS := $/NVCCFLAGS := --compiler-bindir=\/usr\/bin\/gcc-4.3/' common/common.mk.bak > common/common.mk
 sudo -u thor make -j $NPROCS && ./bin/linux/release/deviceQuery < /dev/null
 
 # tests
@@ -99,9 +103,9 @@ echo -e "[${RED} Testing sdk ${NC}]"
 for f in ./bin/linux/release/*; do $f < /dev/null &> /dev/null || echo "ERROR: $f"; done;
 
 # ------------------------------------------------------------------------------
-echo -e "[${RED} Cleaning up ${NC}]"
-rm -rf $TMP_DIR
+echo -e "You may want to clean up ${TMP_DIR}"
+#rm -rf $TMP_DIR
 
 # ------------------------------------------------------------------------------
-echo "Installation successful!"
+#echo "Installation successful!"
 
