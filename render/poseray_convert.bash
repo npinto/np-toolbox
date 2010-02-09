@@ -16,7 +16,6 @@ OUTPUT=\
 $(python -c "import sys, os;
 print os.path.abspath(sys.argv[1])" "$2")
 
-
 INPUT_DIR=$(dirname $INPUT)
 INPUT_FNAME=$(basename $INPUT)
 INPUT_NOEXT=\
@@ -27,12 +26,19 @@ print os.path.split(os.path.splitext(sys.argv[1])[0])[-1]" $INPUT)
 cp -vf "$POSERAY_PATH"/poseraysettings.ini{,.bak}
 
 # replace with our settings
-cp -vf "$MYPATH"/poseraysettings.ini.wine "$POSERAY_PATH"/poseraysettings.ini
+sed "s/export/export\\/$INPUT_FNAME/" poseraysettings.ini.wine > "$POSERAY_PATH"/poseraysettings.ini
+#cp -vf "$MYPATH"/poseraysettings.ini.wine "$POSERAY_PATH"/poseraysettings.ini
+mkdir -p "$POSERAY_PATH/export/$INPUT_FNAME"
+
+grep savetodir "$POSERAY_PATH"/poseraysettings.ini
+#exit 99
+
+echo Processing ...
 
 cd $INPUT_DIR && 
 wine "$POSERAY_PATH"/PoseRay.exe -load $INPUT_FNAME -convert 1 -close && 
 mkdir -p $OUTPUT &&
-mv -vf "$POSERAY_PATH"/export/${INPUT_NOEXT}_POV_* $OUTPUT/ && 
+cp -vf "$POSERAY_PATH"/export/$INPUT_FNAME/${INPUT_NOEXT}_* $OUTPUT/ && 
 $POVRAY_CMD +L${OUTPUT} +I${OUTPUT}/${INPUT_NOEXT}_POV_scene.pov +O${OUTPUT}/${INPUT_NOEXT}_POV_scene.png
 
 # revert settings changes
