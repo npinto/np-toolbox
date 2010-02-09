@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 POSERAY_PATH=$HOME/.wine/drive_c/Program\ Files/poseray_install_3_12_2
 POVRAY_CMD="povray +Q9 +FN +AM1 -GA -D +A -UA +H200 +W200"
@@ -21,6 +21,7 @@ INPUT_FNAME=$(basename $INPUT)
 INPUT_NOEXT=\
 $(python -c "import sys, os;
 print os.path.split(os.path.splitext(sys.argv[1])[0])[-1]" $INPUT)
+INPUT_NOEXT=$(echo $INPUT_NOEXT | sed 's/\./_/') # Replace . with _
 
 # backup previous poseray settings
 cp -vf "$POSERAY_PATH"/poseraysettings.ini{,.bak}
@@ -30,22 +31,29 @@ sed "s/export/export\\/$INPUT_FNAME/" poseraysettings.ini.wine > "$POSERAY_PATH"
 #cp -vf "$MYPATH"/poseraysettings.ini.wine "$POSERAY_PATH"/poseraysettings.ini
 mkdir -p "$POSERAY_PATH/export/$INPUT_FNAME"
 
-grep savetodir "$POSERAY_PATH"/poseraysettings.ini
+echo Wine temporary $(grep savetodir "$POSERAY_PATH"/poseraysettings.ini)
+echo "OUTPUT=$OUTPUT"
 #exit 99
 
 echo Processing ...
 
+set -x 
+
 cd $INPUT_DIR && 
 wine "$POSERAY_PATH"/PoseRay.exe -load $INPUT_FNAME -convert 1 -close && 
 mkdir -p $OUTPUT &&
-cp -vf "$POSERAY_PATH"/export/$INPUT_FNAME/${INPUT_NOEXT}_* $OUTPUT/ && 
-$POVRAY_CMD +L${OUTPUT} +I${OUTPUT}/${INPUT_NOEXT}_POV_scene.pov +O${OUTPUT}/${INPUT_NOEXT}_POV_scene.png
+mv -f "$POSERAY_PATH"/export/$INPUT_FNAME/* $OUTPUT/ &> /dev/null && 
+cd $OUTPUT && 
+sed 's/^background .*/background { color rgb<.5,.5,.5>  }/' *_POV_scene.pov > *_POV_scene.pov.new &&
+mv -f *_POV_scene.pov{.new,} &&
+$POVRAY_CMD +L./ +I./${INPUT_NOEXT}_POV_scene.pov +O./${INPUT_NOEXT}_POV_scene.png
 
 # revert settings changes
 cp -vf "$POSERAY_PATH"/poseraysettings.ini{.bak,}
 
 echo Done!
 
+set -
 
 
 
