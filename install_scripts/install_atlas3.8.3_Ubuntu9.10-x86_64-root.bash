@@ -33,8 +33,8 @@ done;
 sleep 2
 CPUFREQ=$(grep MHz /proc/cpuinfo | head -n 1 | awk '{print $4}')
 kill -9 \
-    $(ps aux | grep "dd if=/dev/urandom of=/dev/null" | \
-    awk '{print $2}' | head -n ${NPROCS}) 
+    $(ps aux | grep "dd if.*/dev/urandom of.*/dev/null" | \
+    awk '{print $2}') 
 echo Using CPUFREQ=${CPUFREQ}
 
 # ------------------------------------------------------------------------------
