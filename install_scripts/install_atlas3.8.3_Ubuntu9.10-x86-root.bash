@@ -38,8 +38,12 @@ kill -9 \
 echo Using CPUFREQ=${CPUFREQ}
 
 # ------------------------------------------------------------------------------
-echo -e "[ ${RED} Install dependencies ${NC} ]"
-apt-get install -y build-essential gfortran 
+echo -e "[ ${RED} Install/remove dependencies ${NC} ]"
+apt-get --reinstall install -y build-essential gfortran gfortran-4.2
+apt-get --purge remove -y g77
+apt-get --purge remove -y "^liblapack.*"
+apt-get --purge remove -y "^libblas.*"
+rm -rvf /usr/lib{,64}/atlas/
 
 # ------------------------------------------------------------------------------
 echo -e "[ ${RED} Download lapack-3.2.1 ${NC} ]"
