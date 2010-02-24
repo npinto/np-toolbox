@@ -23,6 +23,12 @@ NPROCS=$(grep processor /proc/cpuinfo | wc -l)
 TMP_DIR=$(mktemp -d)
 cd $TMP_DIR
 
+echo -e "[ ${RED}Shuting down X/gdm${NC} ]"
+/etc/init.d/gdm stop
+killall -9 X
+killall -9 Xorg
+
+
 # {un,}install necessary stuff from ubuntu repos
 echo -e "[ ${RED}Uninstalling previous installation${NC} ]"
 apt-get --purge remove nvidia"*" -y
