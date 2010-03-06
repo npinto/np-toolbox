@@ -29,6 +29,7 @@ apt-get remove tmux -y
 # ------------------------------------------------------------------------------
 echo -e "[${RED} Installing dependencies ${NC}]"
 apt-get build-dep tmux -y
+apt-get install libncurses5-dev -y
 
 # ------------------------------------------------------------------------------
 echo -e "[${RED} Installing ${NC}]"
