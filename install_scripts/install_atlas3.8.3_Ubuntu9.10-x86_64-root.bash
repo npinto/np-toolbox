@@ -79,7 +79,7 @@ cpufreq-selector -g performance
 # if you don't want 64bit code remove the '-b 64' and '-fPIC' flags
 ../configure -b 64 -D c -DPentiumCPS=${CPUFREQ} \
     -Fa alg -fPIC \
-    --with-netlib-lapack=../../../lapack-3.2.1/lapack_LINUX.a
+    --with-netlib-lapack=../../../lapack-3.2.1/lapack_LINUX.a -Si cputhrchk 0
 
 echo -e "[ ${RED} Build atlas-3.8.3 ${NC} ]"
 # this takes a long time, go get some coffee, it should end without error
