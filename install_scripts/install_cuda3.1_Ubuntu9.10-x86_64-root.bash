@@ -38,9 +38,9 @@ apt-get install libc6-dev-i386 build-essential libglut3-dev libxmu-dev libxi-dev
 
 # ------------------------------------------------------------------------------
 echo -e "[${RED} Installing driver ${NC}]"
-wget http://developer.download.nvidia.com/compute/cuda/3_1/drivers/devdriver_3.1_linux_64_256.35.run
+wget http://developer.download.nvidia.com/compute/cuda/3_1/drivers/devdriver_3.1_linux_64_256.44.run
 kill -9 $(ps aux | grep /usr/bin/X) 2> /dev/null
-sh devdriver_3.1_linux_64_256.35.run --ui=none --no-questions --accept-license -X
+sh devdriver_3.1_linux_64_256.44.run --ui=none --no-questions --accept-license -X
 
 # ------------------------------------------------------------------------------
 echo -e "[${RED} Initializing device(s) ${NC}]"
