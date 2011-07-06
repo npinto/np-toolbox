@@ -49,8 +49,7 @@ echo "Rsync'ing..."
 mkdir -p ./mnt_tmp
 mount $devsys ./mnt_tmp
 mkdir -p ./mnt_tmp/{sys,proc,dev}
-#time rsync -ahHAvx --exclude=/proc/* --exclude=/sys/* --exclude=/mnt_tmp/* --exclude=/root/* --exclude=/dev/* --include=/dev/console --include=/dev/null /* ./mnt_tmp/
-time rsync -ahHAx --exclude=/proc/* --exclude=/sys/* --exclude=/mnt/* --exclude=/root/* /* ./mnt_tmp/
+time rsync -ahHAx --exclude=/proc/* --exclude=/sys/* --exclude=/mnt/* --exclude=$(pwd)/* /* ./mnt_tmp/
 
 echo "========================================================================="
 echo "Installing grub..."
