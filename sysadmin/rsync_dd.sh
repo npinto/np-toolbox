@@ -11,7 +11,7 @@ if [[ $# != 2 ]]; then
     echo "Usage: $PROGNAME /dev/source /dev/destination"
 fi;
 
-#set -e
+set -e
 #set -x
 
 src=$1
@@ -20,37 +20,42 @@ dst=$2
 file $src | grep block || error_exit "ERROR: $src is not a block device"
 file $dst | grep block || error_exit "ERROR: $dst is not a block device"
 
-#dd if=/dev/zero of=/dev/sdb bs=512 count=1
+echo "WARNING WARNING WARNING WARNING WARNING WARNING"
+echo "$src will be clone into $dst, all data from $dst will be DELETED"
+echo "Press any key to continue or Ctrl-C to quit"
+read
 
-## backup sda extended partition table
-#sfdisk -d /dev/sda > sda.sfdisk
+echo "========================================================================="
+echo "Copying partition table..."
+dd if=/dev/zero of=$dst bs=1M count=1
+sfdisk -d $src > $(basename $src).sfdisk
+sfdisk $dst < $(basename $src).sfdisk
+echo "Sleeping..."
+sleep 3
+echo "done."
 
-## restore it into sdb
-#sfdisk /dev/sdb < sda.sfdisk
+echo "========================================================================="
+devswap=$(fdisk -l $dst | grep 'Linux swap' | awk '{print $1}')
+echo "Creating swap partition on '$devswap' ..."
+mkswap $devswap
 
-## swap
-#mkswap /dev/sdb5
-## root
-#mkfs.ext4 /dev/sdb6
+echo "========================================================================="
+devsys=$(fdisk -l $dst | grep '83  Linux' | head -n1 | awk '{print $1}')
+echo "Creating ext4 partition on '$devsys' ..."
+time mkfs.ext4 $devsys
 
-## rsync
-#mkdir -p /mnt/clone
-#mount /dev/sdb6 /mnt/clone
-#mkdir -p /mnt/clone/{sys,proc,dev}
-#rsync -avxz --exclude=/proc --exclude=/sys --exclude=/dev / /mnt/clone
-#rsync -ahHAvxz --exclude=/proc/* --exclude=/sys/* --exclude=/tmp/* --exclude=/root/* /* /mnt/clone/
+echo "========================================================================="
+echo "Rsync'ing..."
+mkdir -p ./mnt_tmp
+mount $devsys ./mnt_tmp
+mkdir -p ./mnt_tmp/{sys,proc,dev}
+time rsync -ahHAx --exclude=/proc/* --exclude=/sys/* --exclude=/mnt/* --exclude=$(pwd)/* --exclude=/root/.ssh/* /* ./mnt_tmp/
 
-## monitor progress
-#watch df -h /dev/sd{a,b}6
+echo "========================================================================="
+echo "Installing grub..."
+grub-install --recheck --root-directory=./mnt_tmp $dst
 
-## grub w/ attached drive (i.e. sdb6 => hd1,5)
-
-#mount -t proc none /mnt/clone/proc
-#mount -o bind /dev /mnt/clone/dev
-#mount -o bind /sys /mnt/clone/sys 
-#chroot /mnt/clone /bin/bash
-
-#grub
-#grub> root (hd1,5)
-#grub> setup (hd1)
-#grub> quit
+echo "========================================================================="
+echo "Cleaning up..."
+umount ./mnt_tmp && rm -rf ./mnt_tmp
+rm -vf $(basename $src).sfdisk
