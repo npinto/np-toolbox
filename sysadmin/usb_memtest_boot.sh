@@ -42,7 +42,7 @@ read
 set -x
 
 ## delete entire partition table on the usb disk
-#dd if=/dev/zero of=$USBDEV bs=1M count=1
+dd if=/dev/zero of=$USBDEV bs=512 count=1
 
 # create 1 partition
 fdisk $USBDEV << EOF
