@@ -34,9 +34,9 @@ dd if=/usr/share/syslinux/mbr.bin of=/dev/sdd
 wget -r --level 1 -A .iso http://distfiles.gentoo.org/releases/amd64/autobuilds/current-iso/
 
 ISO_FNAME='install-amd64-minimal-20110707.iso'
-wget http://distfiles.gentoo.org/releases/amd64/autobuilds/current-iso/
+wget http://distfiles.gentoo.org/releases/amd64/autobuilds/current-iso/${ISO_FNAME}
 
-mkdir -p ./mnt_iso && mount -o loop,ro -t iso9660 ./install-amd64-minimal-20110707.iso ./mnt_iso
+mkdir -p ./mnt_iso && mount -o loop,ro -t iso9660 ${ISO_FNAME} ./mnt_iso
 
 mkdir -p ./mnt_usb && mount -t vfat /dev/sdd1 ./mnt_usb
 
