@@ -12,15 +12,11 @@ set -e
 trap 'previous_command=$this_command; this_command=$BASH_COMMAND' DEBUG
 trap 'echo "exit $? due to $previous_command"' EXIT
 
-export N_PROCESSORS=$(cat /proc/cpuinfo  | grep processor | wc -l)
-export MAKEOPTS="-j $(($N_PROCESSORS+1))"
-
-export EPREFIX=$HOME/gentoo
-export PATH=$EPREFIX/usr/bin:$EPREFIX/bin:$EPREFIX/tmp/usr/bin:$EPREFIX/tmp/bin:$PATH
-#export CHOST="x86_64-apple-darwin10"
+source ./env.sh
 
 # Grab latest bootstrap-prefix.sh
-rm -f bootstrap-prefix.sh && wget -O bootstrap-prefix.sh http://overlays.gentoo.org/proj/alt/browser/trunk/prefix-overlay/scripts/bootstrap-prefix.sh?format=txt
+rm -f bootstrap-prefix.sh
+wget -O bootstrap-prefix.sh http://overlays.gentoo.org/proj/alt/browser/trunk/prefix-overlay/scripts/bootstrap-prefix.sh?format=txt
 
 # Patch to disable python crypt and nis modules
 # For more info:
@@ -106,14 +102,17 @@ mkdir -p $EPREFIX/etc/portage/env/dev-lang/
 echo "export LDFLAGS='-L/usr/lib64'" >> $EPREFIX/etc/portage/env/dev-lang/python
 #
 #LDFLAGS="-L/usr/lib64" emerge --oneshot --nodeps python
-emerge --oneshot python
+# is this nec?
+#emerge --oneshot python
 
 
 #ln -sf $EPREFIX/lib/libz.so{.1,}
 #LDFLAGS="-L$EPREFIX/lib/" emerge libxml2
-emerge libxml2
+#emerge libxml2
 
-USE=vanilla emerge -u gcc
+# Is this nec?
+#USE=vanilla emerge -u gcc
+
 #gcc-config 2
 #source $EPREFIX/etc/profile
 
@@ -125,6 +124,9 @@ hash -r
 emerge --sync
 
 #USE="-git" emerge -u system
+USE="-git" emerge --oneshot gettext
+emerge --oneshot git
+
 emerge -u system
 
 emerge -avuDN system world
