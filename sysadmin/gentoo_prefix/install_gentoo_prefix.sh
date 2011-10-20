@@ -177,7 +177,7 @@ emerge app-portage/gentoolkit-dev
 # layman
 emerge layman
 layman -S
-#layman -a science
+layman -a sekyfsr
 echo "source $EPREFIX/var/lib/layman/make.conf" >> $EPREFIX/etc/make.conf
 eix-sync
 
