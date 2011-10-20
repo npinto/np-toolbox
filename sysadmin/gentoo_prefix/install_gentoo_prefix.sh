@@ -140,6 +140,7 @@ echo 'sys-devel/gcc vanilla' >> $EPREFIX/etc/portage/package.use/gcc
 emerge -u gcc
 #gcc-config 2
 #source $EPREFIX/etc/profile
+emerge -u groff
 
 emerge -u system
 
@@ -151,11 +152,12 @@ echo "MAKEOPTS=\"-j$((${N_PROCESSORS}+1))\"" >> $EPREFIX/etc/make.conf
 echo 'dev-lang/python sqlite wide-unicode berkdb' >> $EPREFIX/etc/portage/package.use/python
 
 # -- Update gcc
-gcc-config 2
-source $EPREFIX/etc/profile
+#gcc-config 2
+#source $EPREFIX/etc/profile
 
 # -- Final system installation
-emerge -e -j system world
+emerge -e -j system
+emerge -e -j world
 
 # system done!
 
@@ -175,7 +177,7 @@ emerge app-portage/gentoolkit-dev
 # layman
 emerge layman
 layman -S
-#layman -a science
+layman -a sekyfsr
 echo "source $EPREFIX/var/lib/layman/make.conf" >> $EPREFIX/etc/make.conf
 eix-sync
 
