@@ -48,6 +48,7 @@ chmod 755 bootstrap-prefix.sh
 ./bootstrap-prefix.sh $EPREFIX/tmp bash
 ./bootstrap-prefix.sh $EPREFIX/tmp zlib
 ./bootstrap-prefix.sh $EPREFIX/tmp python
+./bootstrap-prefix.sh $EPREFIX/tmp bison
 ./bootstrap-prefix.sh $EPREFIX portage
 
 hash -r
