@@ -1,13 +1,6 @@
 #!/bin/bash
 
-# ----------------------------------------------------------------------------
-# Based on:
-# http://www.gentoo.org/proj/en/gentoo-alt/prefix/bootstrap-solaris.xml
-# ----------------------------------------------------------------------------
-
 set -e
-#set -x
-#set -o pipefail
 
 trap 'previous_command=$this_command; this_command=$BASH_COMMAND' DEBUG
 trap 'echo "exit $? due to $previous_command"' EXIT
@@ -17,164 +10,47 @@ trap 'echo "exit $? due to $previous_command"' EXIT
 # Update environment with prefix variables (EPREFIX, etc.)
 source $(dirname $0)/update_env.sh
 
-# Backup previous installation
-mv -vf $EPREFIX{,-backup-$(date +"%Y-%m-%d_%Hh%Mm%Ss")}
-
-# Grab latest bootstrap-prefix.sh
-rm -f bootstrap-prefix.sh
-wget -O bootstrap-prefix.sh http://overlays.gentoo.org/proj/alt/browser/trunk/prefix-overlay/scripts/bootstrap-prefix.sh?format=txt
-
-# Patch to disable python crypt and nis modules
-# For more info:
-# * https://bugs.gentoo.org/show_bug.cgi?id=381163
-# * http://archives.gentoo.org/gentoo-alt/msg_a1856438065eec550b5bf410488db9bb.xml
-rm -f boostrap-prefix-python-disable-crypt-nis.patch
-wget https://raw.github.com/gist/1294750/d96a4b0f2be742dcca3adcb220a603b2260c4cc9/boostrap-prefix-python-disable-crypt-nis.patch
-patch -p0 < boostrap-prefix-python-disable-crypt-nis.patch
-
 # ----------------------------------------------------------------------------
+emerge zsh
+emerge tmux
+emerge ncdu
+emerge htop
 
-chmod 755 bootstrap-prefix.sh
-./bootstrap-prefix.sh $EPREFIX tree
-./bootstrap-prefix.sh $EPREFIX/tmp make
-./bootstrap-prefix.sh $EPREFIX/tmp wget
-./bootstrap-prefix.sh $EPREFIX/tmp sed
-./bootstrap-prefix.sh $EPREFIX/tmp coreutils6
-./bootstrap-prefix.sh $EPREFIX/tmp findutils5
-./bootstrap-prefix.sh $EPREFIX/tmp tar15
-./bootstrap-prefix.sh $EPREFIX/tmp patch
-./bootstrap-prefix.sh $EPREFIX/tmp grep
-./bootstrap-prefix.sh $EPREFIX/tmp gawk
-./bootstrap-prefix.sh $EPREFIX/tmp bash
-./bootstrap-prefix.sh $EPREFIX/tmp zlib
-./bootstrap-prefix.sh $EPREFIX/tmp python
-./bootstrap-prefix.sh $EPREFIX portage
+# -- gnu parallel
+(cd $EPREFIX/usr/local/portage && $EPREFIX/usr/portage/scripts/ecopy sys-process/parallel)
+emerge sys-process/parallel
 
-hash -r
+# -- blas/atlas
+emerge -u cblas lapack blas
+emerge -u {blas,lapack}-atlas
+eselect blas set atlas-threads
+eselect cblas set atlas-threads
+eselect lapack set atlas
 
-# ----------------------------------------------------------------------------
+# -- numpy
+echo "dev-python/numpy doc lapack test" >> $EPREFIX/etc/portage/package.use/numpy
+emerge -uDN numpy
 
-emerge --oneshot sed
+# -- scipy
+#emerge -uDN umfpack
+#echo "sci-libs/scipy doc umfpack" >> $EPREFIX/etc/portage/package.use/scipy
 
-emerge --oneshot --nodeps bash
-emerge --oneshot --nodeps xz-utils
-emerge --oneshot wget
+# work around the temporary kernel.org outtage
+cp -vf $(dirname $0)/util-linux-2.17.ebuild $EPREFIX/usr/portage/sys-apps/util-linux/
+ebuild $EPREFIX/usr/portage/sys-apps/util-linux/util-linux-2.17.ebuild manifest
+emerge --oneshot --nodeps util-linux
 
-emerge --oneshot --nodeps baselayout-prefix
-emerge --oneshot --nodeps m4
-emerge --oneshot --nodeps flex
-emerge --oneshot --nodeps bison
-emerge --oneshot --nodeps binutils-config
-MAKEOPTS=-j1 emerge --oneshot --nodeps binutils
-emerge --oneshot --nodeps gcc-config
-emerge --oneshot --nodeps "=gcc-4.2*"
+emerge -uDN scipy
 
-emerge --oneshot coreutils
-emerge --oneshot findutils
-emerge --oneshot tar
-emerge --oneshot grep
-emerge --oneshot patch
-emerge --oneshot gawk
-emerge --oneshot make
-emerge --oneshot --nodeps file
-emerge --oneshot --nodeps eselect
-emerge --oneshot pax-utils
+# -- XXX
+easy_install -U pip
 
-# -- Fixes:
+pip install -vUI ipython
 
-# python dependencies
-#emerge --oneshot sys-devel/autoconf
-#emerge --oneshot app-admin/eselect-python
-#emerge --oneshot app-arch/bzip2
-#emerge --oneshot sys-libs/zlib
-#emerge --oneshot virtual/libffi
-#emerge --oneshot virtual/libintl
-#emerge --oneshot sys-libs/db
-#emerge --oneshot sys-libs/gdbm
-#emerge --oneshot sys-libs/ncurses
-#emerge --oneshot sys-libs/readline
-#emerge --oneshot dev-db/sqlite
-#emerge --oneshot dev-libs/openssl
-#emerge --oneshot --nodeps dev-lang/tk # deps here???
-#emerge --oneshot dev-tcltk/blt
-#emerge --oneshot dev-libs/expat
-#emerge --oneshot dev-util/pkgconfig
-#emerge --oneshot sys-devel/libtool
-#emerge --oneshot --nodeps app-admin/python-updater
-#emerge --oneshot app-misc/mime-types
-#emerge --oneshot dev-python/python-docs
-#emerge --oneshot readline
-#emerge --oneshot --onlydeps python
-#libffi
-# python
-# XXX: or change /portage/env/dev-lang/python w/ LDFLAGS export
-mkdir -p $EPREFIX/etc/portage/env/dev-lang/
-echo "export LDFLAGS='-L/usr/lib64'" >> $EPREFIX/etc/portage/env/dev-lang/python
-#
-#LDFLAGS="-L/usr/lib64" emerge --oneshot --nodeps python
-# is this nec?
-#emerge --oneshot python
+pip install -vUI pycuda
+
+pip install -vUI joblib
+
+pip install -vUI scikits.learn
 
 
-#ln -sf $EPREFIX/lib/libz.so{.1,}
-#LDFLAGS="-L$EPREFIX/lib/" emerge libxml2
-#emerge libxml2
-
-# Update portage
-env FEATURES="-collision-protect" emerge --oneshot portage
-mkdir -p $EPREFIX/etc/portage/package.{keywords,use}
-
-# Clean up tmp dir
-rm -Rf $EPREFIX/tmp/*
-hash -r
-
-# Synchronize repo
-emerge --sync
-
-# Fix dependencies before 'emerge -u system'
-USE="-git" emerge --oneshot gettext
-emerge --oneshot git
-
-echo 'sys-devel/gcc vanilla' >> $EPREFIX/etc/portage/package.use/gcc
-emerge -u gcc
-#gcc-config 2
-#source $EPREFIX/etc/profile
-
-emerge -u system
-
-# new use / make opts
-# XXX
-cp -vf $(dirname $0)/make.conf $EPREFIX/etc/
-echo "MAKEOPTS=\"-j$((${N_PROCESSORS}+1))\"" >> $EPREFIX/etc/make.conf
-
-# Final system installation
-emerge -e -j system world
-
-# system done!
-
-# ----------------------------------------------------------------------------
-
-# eix
-emerge eix
-eix-update
-echo -e '\055e' >> $EPREFIX/etc/eix-sync.conf
-eix-sync
-
-# other portage / gentoo related
-emerge app-portage/portage-utils
-emerge app-portage/gentoolkit-dev
-
-# layman
-emerge layman
-layman -S
-#layman -a science
-echo "source $EPREFIX/var/lib/layman/make.conf" >> $EPREFIX/etc/make.conf
-eix-sync
-
-# local overlay
-mkdir -p $EPREFIX/usr/local/portage/profiles
-echo "local_overlay" > $EPREFIX/usr/local/portage/profiles/repo_name
-echo "PORTDIR_OVERLAY=\"\${PORTDIR_OVERLAY} $EPREFIX/usr/local/portage/\"" >> $EPREFIX/etc/make.conf
-
-# autounmask
-emerge autounmask

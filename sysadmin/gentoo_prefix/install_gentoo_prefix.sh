@@ -18,7 +18,7 @@ trap 'echo "exit $? due to $previous_command"' EXIT
 source $(dirname $0)/update_env.sh
 
 # Backup previous installation
-mv -vf $EPREFIX{,-backup-$(date +"%Y-%m-%d_%Hh%Mm%Ss")}
+test -d $EPREFIX && mv -vf $EPREFIX{,-backup-$(date +"%Y-%m-%d_%Hh%Mm%Ss")}
 
 # Grab latest bootstrap-prefix.sh
 rm -f bootstrap-prefix.sh
@@ -142,12 +142,18 @@ emerge -u gcc
 
 emerge -u system
 
-# new use / make opts
-# XXX
+# -- New (global) options: USE, MAKEOPTS, etc.
 cp -vf $(dirname $0)/make.conf $EPREFIX/etc/
 echo "MAKEOPTS=\"-j$((${N_PROCESSORS}+1))\"" >> $EPREFIX/etc/make.conf
 
-# Final system installation
+# -- Update package-dependent USE
+echo 'dev-lang/python sqlite wide-unicode berkdb' >> $EPREFIX/etc/portage/package.use/python
+
+# -- Update gcc
+gcc-config 2
+source $EPREFIX/etc/profile
+
+# -- Final system installation
 emerge -e -j system world
 
 # system done!
@@ -162,6 +168,7 @@ eix-sync
 
 # other portage / gentoo related
 emerge app-portage/portage-utils
+emerge app-portage/gentoolkit
 emerge app-portage/gentoolkit-dev
 
 # layman
@@ -178,40 +185,3 @@ echo "PORTDIR_OVERLAY=\"\${PORTDIR_OVERLAY} $EPREFIX/usr/local/portage/\"" >> $E
 
 # autounmask
 emerge autounmask
-
-# ----------------------------------------------------------------------------
-# --
-# ----------------------------------------------------------------------------
-emerge zsh
-emerge tmux
-emerge ncdu
-
-# -- gnu parallel
-(cd $EPREFIX/usr/local/portage && $EPREFIX/usr/portage/scripts/ecopy sys-process/parallel)
-emerge sys-process/parallel
-
-# -- blas/atlas
-emerge -u cblas lapack blas
-emerge -u {blas,lapack}-atlas
-eselect blas set atlas-threads
-eselect cblas set atlas-threads
-eselect lapack set atlas
-
-# -- numpy
-echo "dev-python/numpy doc lapack test" >> $EPREFIX/etc/portage/package.use/numpy
-emerge -uDN numpy
-
-# -- scipy
-emerge -uDN umfpack
-echo "sci-libs/scipy doc umfpack" >> $EPREFIX/etc/portage/package.use/scipy
-
-# work around the temporary kernel.org outtage
-cp -vf $(dirname $0)/util-linux-2.17.ebuild $EPREFIX/usr/portage/sys-apps/util-linux/
-ebuild $EPREFIX/usr/portage/sys-apps/util-linux/util-linux-2.17.ebuild manifest
-emerge --oneshot --nodeps util-linux
-
-emerge -uDN scipy
-
-#emerge -u ipython numpy scipy matplotlib
-
-
