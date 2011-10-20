@@ -5,21 +5,23 @@ source ./init.sh
 # ----------------------------------------------------------------------------
 
 # eix
-emerge eix
+emerge -uDN eix
 eix-update
 echo -e '\055e' >> $EPREFIX/etc/eix-sync.conf
 eix-sync
 
 # other portage / gentoo related
-emerge app-portage/portage-utils
-emerge app-portage/gentoolkit
-emerge app-portage/gentoolkit-dev
+emerge -uDN app-portage/portage-utils
+emerge -uDN app-portage/gentoolkit
+emerge -uDN app-portage/gentoolkit-dev
 
 # layman
-emerge layman
-layman -S
-layman -a sekyfsr
-echo "source $EPREFIX/var/lib/layman/make.conf" >> $EPREFIX/etc/make.conf
+emerge -uDN layman
+if [ ! -d $EPREFIX/var/lib/layman/sekyfsr ]; then
+    layman -S;
+    layman -a sekyfsr;
+    echo "source $EPREFIX/var/lib/layman/make.conf" >> $EPREFIX/etc/make.conf;
+fi;
 eix-sync
 
 # local overlay
@@ -28,4 +30,4 @@ echo "local_overlay" > $EPREFIX/usr/local/portage/profiles/repo_name
 echo "PORTDIR_OVERLAY=\"\${PORTDIR_OVERLAY} $EPREFIX/usr/local/portage/\"" >> $EPREFIX/etc/make.conf
 
 # autounmask
-emerge autounmask
+emerge -uDN autounmask
