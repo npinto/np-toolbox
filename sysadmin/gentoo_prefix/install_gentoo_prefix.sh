@@ -28,9 +28,9 @@ wget -O bootstrap-prefix.sh http://overlays.gentoo.org/proj/alt/browser/trunk/pr
 # For more info:
 # * https://bugs.gentoo.org/show_bug.cgi?id=381163
 # * http://archives.gentoo.org/gentoo-alt/msg_a1856438065eec550b5bf410488db9bb.xml
-rm -f boostrap-prefix-python-disable-crypt-nis.patch
-wget https://raw.github.com/gist/1294750/d96a4b0f2be742dcca3adcb220a603b2260c4cc9/boostrap-prefix-python-disable-crypt-nis.patch
-patch -p0 < boostrap-prefix-python-disable-crypt-nis.patch
+rm -f bootstrap-prefix-python-disable-crypt-nis.patch
+wget https://raw.github.com/gist/1294750/d96a4b0f2be742dcca3adcb220a603b2260c4cc9/bootstrap-prefix-python-disable-crypt-nis.patch
+patch -p0 < bootstrap-prefix-python-disable-crypt-nis.patch
 
 # ----------------------------------------------------------------------------
 
