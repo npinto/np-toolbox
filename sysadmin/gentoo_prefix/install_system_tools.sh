@@ -4,6 +4,14 @@ source ./init.sh
 
 # ----------------------------------------------------------------------------
 
+# keychain
+emerge -uDN keychain
+
+# vim
+echo "app-editors/vim bash-completion vim-pager python ruby" >> $EPREFIX/etc/portage/package.use/vim
+emerge -juN vim{,-core}
+
+
 # eix
 emerge eix
 eix-update
