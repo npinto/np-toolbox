@@ -140,7 +140,7 @@ echo 'sys-devel/gcc vanilla' >> $EPREFIX/etc/portage/package.use/gcc
 emerge -u gcc
 #gcc-config 2
 #source $EPREFIX/etc/profile
-emerge -u groff
+MAKEOPTS=-j1 emerge -u groff
 
 emerge -u system
 
