@@ -152,11 +152,12 @@ echo "MAKEOPTS=\"-j$((${N_PROCESSORS}+1))\"" >> $EPREFIX/etc/make.conf
 echo 'dev-lang/python sqlite wide-unicode berkdb' >> $EPREFIX/etc/portage/package.use/python
 
 # -- Update gcc
-gcc-config 2
-source $EPREFIX/etc/profile
+#gcc-config 2
+#source $EPREFIX/etc/profile
 
 # -- Final system installation
-emerge -e -j system world
+emerge -e -j system
+emerge -e -j world
 
 # system done!
 
