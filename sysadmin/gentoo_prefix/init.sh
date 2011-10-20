@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 trap 'previous_command=$this_command; this_command=$BASH_COMMAND' DEBUG
 trap 'echo "exit $? due to $previous_command"' EXIT
