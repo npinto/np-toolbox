@@ -1,22 +1,13 @@
 #!/bin/bash
 
 # ----------------------------------------------------------------------------
-# Based on:
+# Derived from:
 # http://www.gentoo.org/proj/en/gentoo-alt/prefix/bootstrap-solaris.xml
 # ----------------------------------------------------------------------------
 
-set -e
-#set -x
-#set -o pipefail
-
-trap 'previous_command=$this_command; this_command=$BASH_COMMAND' DEBUG
-trap 'echo "exit $? due to $previous_command"' EXIT
+source ./init.sh
 
 # ----------------------------------------------------------------------------
-
-# Update environment with prefix variables (EPREFIX, etc.)
-source $(dirname $0)/update_env.sh
-
 # Backup previous installation
 test -d $EPREFIX && mv -vf $EPREFIX{,-backup-$(date +"%Y-%m-%d_%Hh%Mm%Ss")}
 
